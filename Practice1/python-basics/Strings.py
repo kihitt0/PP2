@@ -1,9 +1,7 @@
-b = "Hello, World!"
-print(b[2:5])
+a = "Hello"
+b = "World"
+c = a + b
+print(c)
 
-print(b[:5])
-
-print(b[2:])
-
-b = "Hello, World!"
-print(b[-5:-2])
+c = a + " " + b
+print(c)
