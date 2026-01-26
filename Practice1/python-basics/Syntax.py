@@ -1,13 +1,7 @@
-if 5 > 2:
-  print("Five is greater than two!")
+print("Python is fun!")
 
-if 5 > 2:
- print("Five is greater than two!") 
-if 5 > 2:
-        print("Five is greater than two!") 
+print("Hello World!")
+print("Have a good day.")
+print("Learning Python is fun!")
 
-x = 5
-y = "Hello, World!"
-
-#This is a comment.
-print("Hello, World!")
+print("Hello"); print("How are you?"); print("Bye bye!")
