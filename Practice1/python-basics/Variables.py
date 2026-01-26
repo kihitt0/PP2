@@ -1,15 +1,20 @@
-x, y, z = "Orange", "Banana", "Cherry"
+x = "Python is awesome"
 print(x)
-print(y)
-print(z)
 
-x = y = z = "Orange"
-print(x)
-print(y)
-print(z)
+x = "Python"
+y = "is"
+z = "awesome"
+print(x, y, z)
 
-fruits = ["apple", "banana", "cherry"]
-x, y, z = fruits
-print(x)
-print(y)
-print(z)
+x = "Python "
+y = "is "
+z = "awesome"
+print(x + y + z)
+
+x = 5
+y = 10
+print(x + y)
+
+x = 5
+y = "John"
+print(x, y)
