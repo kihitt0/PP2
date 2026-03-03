@@ -5,7 +5,8 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(python json.py:*)",
       "Bash(python -c \":*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(curl -s \"https://api.github.com/repos/Beisenbek/programming-principles-2/contents/Practice%2005/raw.txt\")"
     ]
   }
 }
