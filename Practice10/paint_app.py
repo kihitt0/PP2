@@ -70,7 +70,7 @@ TOOLS = [TOOL_PENCIL, TOOL_RECTANGLE, TOOL_CIRCLE, TOOL_ERASER]
 font = pygame.font.SysFont("Arial", 15, bold=True)
 
 
-# ══════════════════════════════════════════════
+# ═════════════════════════════════════════════
 #  TOOLBAR LAYOUT  (computed once at start-up)
 # ══════════════════════════════════════════════
 
