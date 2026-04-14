@@ -24,10 +24,3 @@ python moving_ball/main.py
 ## Requirements
 - Python 3.8+
 - pygame >= 2.0.0
-
-## Commit
-```bash
-git add .
-git commit -m "Add Practice7 - Pygame games: Mickey's clock, music player, moving ball"
-git push origin main
-```
