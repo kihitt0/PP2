@@ -76,8 +76,8 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             self.rect.move_ip(5, 0)    # move 5 px right
 
-        # Clamp the player inside the screen boundaries
-        self.rect.clamp_ip(DISPLAYSURF.get_rect())
+        # Clamp the player to the road boundaries (x: 60..340)
+        self.rect.clamp_ip(pygame.Rect(60, 0, 280, SCREEN_HEIGHT))
 
 
 class Enemy(pygame.sprite.Sprite):

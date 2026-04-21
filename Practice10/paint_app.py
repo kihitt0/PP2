@@ -74,8 +74,8 @@ font = pygame.font.SysFont("Arial", 15, bold=True)
 #  TOOLBAR LAYOUT  (computed once at start-up)
 # ══════════════════════════════════════════════
 
-SWATCH_SIZE   = 30          # width and height of each colour swatch
-SWATCH_GAP    = 6           # gap between swatches
+SWATCH_SIZE   = 26          # width and height of each colour swatch
+SWATCH_GAP    = 4           # gap between swatches
 TOOL_BTN_W    = 80          # width of each tool button
 TOOL_BTN_H    = 40          # height of each tool button
 TOOL_BTN_GAP  = 8
@@ -88,9 +88,14 @@ for tool_name in TOOLS:
     tool_buttons[tool_name] = r
     bx += TOOL_BTN_W + TOOL_BTN_GAP
 
-# Place colour swatches after the tool buttons, with a small gap
+# Fill-mode toggle button (placed right after the tool buttons)
+FILL_BTN_W = 52
+FILL_BTN_H = 40
+fill_btn = pygame.Rect(bx + 4, (TOOLBAR_H - FILL_BTN_H) // 2, FILL_BTN_W, FILL_BTN_H)
+
+# Place colour swatches after the fill button, with a small gap
 swatches: list[tuple[pygame.Rect, tuple]] = []   # (Rect, colour)
-sx = bx + 20
+sx = fill_btn.right + 10
 sy = (TOOLBAR_H - SWATCH_SIZE) // 2
 for colour in PALETTE:
     r = pygame.Rect(sx, sy, SWATCH_SIZE, SWATCH_SIZE)
@@ -99,10 +104,10 @@ for colour in PALETTE:
 
 # Brush-size indicator rects (three sizes: small, medium, large)
 BRUSH_SIZES   = [2, 6, 12]
-BRUSH_BTN_W   = 36
+BRUSH_BTN_W   = 30
 BRUSH_BTN_H   = 36
 brush_buttons: list[tuple[pygame.Rect, int]] = []
-bsx = sx + 20
+bsx = sx + 10
 for bs in BRUSH_SIZES:
     r = pygame.Rect(bsx, (TOOLBAR_H - BRUSH_BTN_H) // 2, BRUSH_BTN_W, BRUSH_BTN_H)
     brush_buttons.append((r, bs))
@@ -121,18 +126,27 @@ canvas.fill(WHITE)
 #  DRAWING HELPERS
 # ══════════════════════════════════════════════
 
-def draw_toolbar(active_tool: str, active_colour: tuple, active_brush: int):
-    """Render the toolbar: tool buttons, colour swatches, brush-size buttons."""
+def draw_toolbar(active_tool: str, active_colour: tuple, active_brush: int,
+                 fill_shapes: bool):
+    """Render the toolbar: tool buttons, fill toggle, colour swatches, brush buttons."""
     pygame.draw.rect(screen, TOOLBAR_BG, pygame.Rect(0, 0, SCREEN_W, TOOLBAR_H))
 
     # ── Tool buttons ──────────────────────────
     for name, rect in tool_buttons.items():
-        # Highlight the active tool in a lighter shade
         bg = (120, 120, 180) if name == active_tool else (80, 80, 80)
         pygame.draw.rect(screen, bg, rect, border_radius=6)
         pygame.draw.rect(screen, WHITE, rect, 1, border_radius=6)
         label = font.render(name.capitalize(), True, WHITE)
         screen.blit(label, label.get_rect(center=rect.center))
+
+    # ── Fill / Outline toggle button ──────────
+    # Green = fill mode (shapes are solid), Red = outline mode (hollow shapes)
+    fill_bg  = (50, 150, 60) if fill_shapes else (150, 50, 50)
+    fill_txt = "Fill" if fill_shapes else "Line"
+    pygame.draw.rect(screen, fill_bg, fill_btn, border_radius=6)
+    pygame.draw.rect(screen, WHITE,   fill_btn, 1, border_radius=6)
+    fl = font.render(fill_txt, True, WHITE)
+    screen.blit(fl, fl.get_rect(center=fill_btn.center))
 
     # ── Colour swatches ───────────────────────
     for rect, colour in swatches:
@@ -145,8 +159,7 @@ def draw_toolbar(active_tool: str, active_colour: tuple, active_brush: int):
         bg = (120, 120, 180) if size == active_brush else (80, 80, 80)
         pygame.draw.rect(screen, bg, rect, border_radius=5)
         pygame.draw.rect(screen, WHITE, rect, 1, border_radius=5)
-        # Draw a small dot whose radius reflects the brush size
-        dot_r = min(size, 10)
+        dot_r = min(size, 8)
         pygame.draw.circle(screen, WHITE, rect.center, dot_r)
 
 
@@ -187,6 +200,7 @@ def main():
     active_tool   = TOOL_PENCIL
     active_colour = BLACK
     active_brush  = 6
+    fill_shapes   = True     # True = filled shapes, False = outline only
 
     dragging     = False    # True while the mouse button is held
     drag_start   = (0, 0)   # canvas-space start of current drag
@@ -212,6 +226,8 @@ def main():
                 if event.key == pygame.K_r:  active_tool = TOOL_RECTANGLE
                 if event.key == pygame.K_o:  active_tool = TOOL_CIRCLE
                 if event.key == pygame.K_e:  active_tool = TOOL_ERASER
+                # F key toggles fill / outline mode
+                if event.key == pygame.K_f:  fill_shapes = not fill_shapes
 
             # ── Mouse button pressed ───────────
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -234,6 +250,10 @@ def main():
                     if rect.collidepoint(mx, my):
                         active_brush = size
 
+                # Fill/Outline toggle button
+                if fill_btn.collidepoint(mx, my):
+                    fill_shapes = not fill_shapes
+
                 # If the click is inside the canvas area, begin drawing
                 if my > TOOLBAR_H:
                     dragging   = True
@@ -246,6 +266,8 @@ def main():
                     drag_end = canvas_pos(mx, my)
 
                     draw_colour = WHITE if active_tool == TOOL_ERASER else active_colour
+                    # 0 = filled shape; active_brush = outline thickness
+                    line_w = 0 if fill_shapes else active_brush
 
                     # For shape tools: commit the final shape to the canvas
                     if active_tool == TOOL_RECTANGLE:
@@ -255,7 +277,7 @@ def main():
                         h = abs(drag_end[1] - drag_start[1])
                         if w > 0 and h > 0:
                             pygame.draw.rect(canvas, draw_colour,
-                                             pygame.Rect(x, y, w, h))
+                                             pygame.Rect(x, y, w, h), line_w)
 
                     elif active_tool == TOOL_CIRCLE:
                         cx = (drag_start[0] + drag_end[0]) // 2
@@ -263,7 +285,8 @@ def main():
                         radius = int(math.hypot(drag_end[0] - drag_start[0],
                                                 drag_end[1] - drag_start[1]) / 2)
                         if radius > 0:
-                            pygame.draw.circle(canvas, draw_colour, (cx, cy), radius)
+                            pygame.draw.circle(canvas, draw_colour, (cx, cy), radius,
+                                               line_w)
 
                 dragging = False
 
@@ -296,7 +319,7 @@ def main():
             screen.blit(preview, (0, 0))
 
         # 3. Draw the toolbar on top
-        draw_toolbar(active_tool, active_colour, active_brush)
+        draw_toolbar(active_tool, active_colour, active_brush, fill_shapes)
 
         # 4. Show a cursor dot at the mouse position (inside the canvas)
         mx, my = pygame.mouse.get_pos()

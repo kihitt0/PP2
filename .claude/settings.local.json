@@ -7,7 +7,12 @@
       "Bash(python -c \":*)",
       "Bash(python:*)",
       "Bash(curl -s \"https://api.github.com/repos/Beisenbek/programming-principles-2/contents/Practice%2005/raw.txt\")",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(d:/pp2/venv/Scripts/python.exe --version)",
+      "Bash(d:/pp2/venv/Scripts/pip.exe index *)",
+      "Bash(d:/pp2/venv/Scripts/pip.exe install *)",
+      "Bash(d:/pp2/venv/Scripts/python.exe -c \"import pygame; print\\(pygame.__version__\\)\")",
+      "Bash(d:/pp2/venv/Scripts/python.exe -c \"import ast; ast.parse\\(open\\('d:/pp2/Practice10/paint_app.py'\\).read\\(\\)\\); print\\('OK'\\)\")"
     ]
   }
 }

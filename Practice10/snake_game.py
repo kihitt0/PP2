@@ -241,7 +241,9 @@ def game_loop():
             return    # restart
 
         # ── 2. Self-collision ──────────────────
-        if new_head in snake:
+        # Exclude the tail (snake[:-1]) because it moves away this same tick,
+        # so stepping onto the tail cell is legal.
+        if new_head in snake[:-1]:
             show_message("GAME OVER", f"Bit yourself!  Score: {score}")
             return
 
