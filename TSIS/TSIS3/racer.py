@@ -152,11 +152,16 @@ def _draw_shield_effect(screen, px, py):
 #  Main game function
 # ════════════════════════════════════════════
 
-def run_game(screen, clock, settings, fonts):
-    """Run one game session. Returns (score, distance)."""
+def run_game(screen, clock, settings, fonts, sounds=None):
+    """Run one game session. Returns (score, distance, coins)."""
     font_small, font_medium, font_large = fonts
     car_color  = tuple(settings.get("car_color",  [220, 60, 60]))
     difficulty = settings.get("difficulty", "Normal")
+    sound_on   = settings.get("sound", True)
+
+    def _play(key):
+        if sound_on and sounds and sounds.get(key):
+            sounds[key].play()
     params     = DIFF_PARAMS[difficulty]
 
     # Player: x is relative to ROAD_LEFT, y is absolute
@@ -300,6 +305,7 @@ def run_game(screen, clock, settings, fonts):
                     active_pu = None
                     enemies.remove(e)
                 else:
+                    _play("die")
                     return score, distance, coins
 
         # ── Hazard collisions ─────────────────────
@@ -310,6 +316,7 @@ def run_game(screen, clock, settings, fonts):
                     active_pu = None
                     hazards.remove(hz)
                 else:
+                    _play("die")
                     return score, distance, coins
 
         # ── Power-up collection ───────────────────

@@ -261,8 +261,31 @@ def screen_settings(screen, clock, fonts, settings):
 #  Entry point
 # ════════════════════════════════════════════
 
+def _load_sounds():
+    """Load sound files. Returns dict with Sound objects (or None on failure)."""
+    import os
+    assets = os.path.join(os.path.dirname(__file__), "assets")
+    sounds = {}
+    files = {
+        "eat":     "eaten.mp3",
+        "poison":  "punch.mp3",
+        "levelup": "hp-level-up-mario.mp3",
+        "die":     "punch.mp3",
+    }
+    for key, fname in files.items():
+        path = os.path.join(assets, fname)
+        try:
+            sounds[key] = pygame.mixer.Sound(path)
+        except Exception as e:
+            print(f"[Sound] Could not load {fname}: {e}")
+            sounds[key] = None
+    return sounds
+
+
 def main():
+    pygame.mixer.pre_init(44100, -16, 2, 512)
     pygame.init()
+    pygame.mixer.init()
     screen = pygame.display.set_mode((W, H))
     pygame.display.set_caption("Snake – TSIS 4")
     clock = pygame.time.Clock()
@@ -274,6 +297,7 @@ def main():
     fonts = (font_large, font_medium, font_small, font_tiny)
 
     settings = config.load()
+    sounds   = _load_sounds()
 
     db_ok = False
     try:
@@ -304,7 +328,7 @@ def main():
                 state = "game"
 
         elif state == "game":
-            last_score, last_level = game.run_game(screen, clock, settings, fonts)
+            last_score, last_level = game.run_game(screen, clock, settings, fonts, sounds)
             if db_ok and player_id is not None:
                 try:
                     db.save_session(player_id, last_score, last_level)

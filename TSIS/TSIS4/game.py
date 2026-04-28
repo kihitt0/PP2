@@ -218,10 +218,15 @@ def _flash_level(screen, level, font_large):
 #  Main game loop
 # ════════════════════════════════════════════
 
-def run_game(screen, clock, settings, fonts):
+def run_game(screen, clock, settings, fonts, sounds=None):
     """Run one game session. Returns (score, level)."""
     font_small, font_medium, font_large, font_tiny = fonts
-    snake_color = tuple(settings.get("snake_color", [0, 200, 0]))
+    snake_color  = tuple(settings.get("snake_color", [0, 200, 0]))
+    sound_on     = settings.get("sound", True)
+
+    def _play(key):
+        if sound_on and sounds and sounds.get(key):
+            sounds[key].play()
 
     snake     = [(COLS//2, ROWS//2),
                  (COLS//2-1, ROWS//2),
@@ -289,8 +294,9 @@ def run_game(screen, clock, settings, fonts):
                 shield    = False
                 active_pu = None
                 next_dir  = _REVERSE[direction]
-                # Snake doesn't advance this tick
+                _play("poison")
             else:
+                _play("die")
                 return score, level
         else:
             snake.insert(0, head)
@@ -301,20 +307,24 @@ def run_game(screen, clock, settings, fonts):
                 if eaten["kind"] == "normal":
                     score     += eaten["type"]["pts"]
                     eaten_cnt += 1
+                    _play("eat")
                     foods.remove(eaten)
                     if eaten_cnt >= FOODS_PER_LVL:
                         level     += 1
                         eaten_cnt  = 0
+                        _play("levelup")
                         if level >= 3:
                             new_obs = _spawn_obstacles((level-2)*2, snake, foods, obstacles)
                             obstacles |= new_obs
                         _flash_level(screen, level, font_large)
                 else:  # poison
+                    _play("poison")
                     foods.remove(eaten)
                     for _ in range(2):
                         if len(snake) > 1:
                             snake.pop()
                         else:
+                            _play("die")
                             return score, level
             else:
                 snake.pop()

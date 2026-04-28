@@ -10,8 +10,25 @@ import ui
 W, H = racer.W, racer.H
 
 
+def _load_sounds():
+    import os
+    assets = os.path.join(os.path.dirname(__file__), "assets")
+    sounds = {}
+    files = {"die": "drummusiclooper5000-lose-sfx-365579.mp3"}
+    for key, fname in files.items():
+        path = os.path.join(assets, fname)
+        try:
+            sounds[key] = pygame.mixer.Sound(path)
+        except Exception as e:
+            print(f"[Sound] Could not load {fname}: {e}")
+            sounds[key] = None
+    return sounds
+
+
 def main():
+    pygame.mixer.pre_init(44100, -16, 2, 512)
     pygame.init()
+    pygame.mixer.init()
     screen = pygame.display.set_mode((W, H))
     pygame.display.set_caption("Racer – TSIS 3")
     clock = pygame.time.Clock()
@@ -25,6 +42,7 @@ def main():
     game_fonts  = (font_small, font_medium, font_large)
 
     settings = ps.load_settings()
+    sounds   = _load_sounds()
     state    = "menu"
     last_score, last_dist, last_coins = 0, 0, 0
     player_name = "Player"
@@ -44,7 +62,7 @@ def main():
                 sys.exit()
 
         elif state == "game":
-            last_score, last_dist, last_coins = racer.run_game(screen, clock, settings, game_fonts)
+            last_score, last_dist, last_coins = racer.run_game(screen, clock, settings, game_fonts, sounds)
             ps.add_entry(player_name, last_score, last_dist)
             state = "gameover"
 

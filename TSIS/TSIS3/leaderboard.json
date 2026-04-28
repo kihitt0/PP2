@@ -23,5 +23,10 @@
     "name": "Player",
     "score": 20,
     "distance": 20
+  },
+  {
+    "name": "Player",
+    "score": 12,
+    "distance": 12
   }
 ]
