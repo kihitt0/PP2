@@ -240,18 +240,26 @@ def import_json(conn):
     with open(fn, encoding="utf-8") as f:
         contacts = json.load(f)
 
-    added = skipped = 0
+    added = skipped = overwritten = 0
     for c in contacts:
+        name = c.get("name", "").strip()
+        if not name:
+            continue
         with conn.cursor() as cur:
-            # Duplicate check by name (case-insensitive)
-            cur.execute("SELECT id FROM pb_contacts WHERE LOWER(name)=LOWER(%s)",
-                        (c.get("name",""),))
-            if cur.fetchone():
-                skipped += 1
-                continue
+            cur.execute("SELECT id FROM pb_contacts WHERE LOWER(name)=LOWER(%s)", (name,))
+            existing = cur.fetchone()
+            if existing:
+                choice = input(f"  Duplicate '{name}' — [s]kip / [o]verwrite? ").strip().lower()
+                if choice != "o":
+                    skipped += 1
+                    continue
+                # Overwrite: delete old record (CASCADE removes phones)
+                cur.execute("DELETE FROM pb_contacts WHERE id=%s", (existing[0],))
+                overwritten += 1
+
             cur.execute(
                 "INSERT INTO pb_contacts(name,email,birthday) VALUES(%s,%s,%s) RETURNING id",
-                (c.get("name"), c.get("email"), c.get("birthday"))
+                (name, c.get("email"), c.get("birthday"))
             )
             cid = cur.fetchone()[0]
             for ph in c.get("phones", []):
@@ -262,7 +270,7 @@ def import_json(conn):
         conn.commit()
         added += 1
 
-    print(f"Imported: {added} added, {skipped} skipped (duplicates).")
+    print(f"Imported: {added} added, {overwritten} overwritten, {skipped} skipped.")
 
 
 # ── 9. Import from CSV ────────────────────────────────────────────────────
