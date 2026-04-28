@@ -1,0 +1,76 @@
+[
+  {
+    "name": "Alice Johnson",
+    "email": "alice@gmail.com",
+    "birthday": "1995-03-14",
+    "group": "Friends",
+    "phones": [
+      {"phone": "+77011234567", "kind": "mobile"},
+      {"phone": "+77011234568", "kind": "home"}
+    ]
+  },
+  {
+    "name": "Bob Smith",
+    "email": "bob.smith@mail.com",
+    "birthday": "1988-07-22",
+    "group": "Work",
+    "phones": [
+      {"phone": "+77772345678", "kind": "work"},
+      {"phone": "+77772345679", "kind": "mobile"}
+    ]
+  },
+  {
+    "name": "Carol White",
+    "email": "carol.white@gmail.com",
+    "birthday": "2000-01-05",
+    "group": "Family",
+    "phones": [
+      {"phone": "+77083456789", "kind": "mobile"}
+    ]
+  },
+  {
+    "name": "David Brown",
+    "email": "david@example.com",
+    "birthday": null,
+    "group": "Work",
+    "phones": [
+      {"phone": "+77714567890", "kind": "mobile"}
+    ]
+  },
+  {
+    "name": "Eva Green",
+    "email": "eva.green@gmail.com",
+    "birthday": "1993-11-30",
+    "group": "Friends",
+    "phones": [
+      {"phone": "+77025678901", "kind": "mobile"}
+    ]
+  },
+  {
+    "name": "Frank Black",
+    "email": "frank@mail.com",
+    "birthday": "1979-06-18",
+    "group": "Family",
+    "phones": [
+      {"phone": "+77776789012", "kind": "home"}
+    ]
+  },
+  {
+    "name": "Grace Lee",
+    "email": "grace.lee@example.com",
+    "birthday": null,
+    "group": null,
+    "phones": [
+      {"phone": "+77027890123", "kind": "mobile"}
+    ]
+  },
+  {
+    "name": "Henry King",
+    "email": "henry@company.com",
+    "birthday": "1985-09-09",
+    "group": "Work",
+    "phones": [
+      {"phone": "+77018901234", "kind": "work"}
+    ]
+  }
+]

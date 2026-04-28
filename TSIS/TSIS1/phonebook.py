@@ -233,6 +233,8 @@ def export_json(conn):
 def import_json(conn):
     fn = input("JSON filename: ").strip()
     if not os.path.exists(fn):
+        fn = os.path.join(os.path.dirname(__file__), fn)
+    if not os.path.exists(fn):
         print("File not found.")
         return
     with open(fn, encoding="utf-8") as f:
@@ -267,6 +269,8 @@ def import_json(conn):
 
 def import_csv(conn):
     fn = input("CSV filename (columns: name,phone,kind,email,birthday,group): ").strip()
+    if not os.path.exists(fn):
+        fn = os.path.join(os.path.dirname(__file__), fn)
     if not os.path.exists(fn):
         print("File not found.")
         return
