@@ -189,11 +189,11 @@ def _draw_obstacles(screen, obstacles):
 
 def _draw_hud(screen, score, level, fps, active_pu, shield, personal_best, font_small):
     pygame.draw.rect(screen, (20,20,20), (0, 0, W, HUD_H))
-    screen.blit(font_small.render(f"Score: {score}", True, WHITE), (10, 14))
+    screen.blit(font_small.render(f"Score: {score}", True, WHITE), (10, 8))
     lvl = font_small.render(f"Lv:{level}  {fps}fps", True, GOLD)
-    screen.blit(lvl, (W//2 - lvl.get_width()//2, 14))
+    screen.blit(lvl, (W//2 - lvl.get_width()//2, 8))
     pb = font_small.render(f"Best: {personal_best}", True, (180, 180, 100))
-    screen.blit(pb, (W - pb.get_width() - 10, 32))
+    screen.blit(pb, (W - pb.get_width() - 10, 8))
 
     status = ""
     if shield:
@@ -203,7 +203,7 @@ def _draw_hud(screen, score, level, fps, active_pu, shield, personal_best, font_
         status = f"[{active_pu['name']} {secs}s]"
     if status:
         st = font_small.render(status, True, ORANGE)
-        screen.blit(st, (W - st.get_width() - 10, 14))
+        screen.blit(st, (W - st.get_width() - 10, 30))
 
 
 def _flash_level(screen, level, font_large):
