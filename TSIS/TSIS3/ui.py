@@ -42,6 +42,52 @@ def _btn(screen, font, text, cx, cy, w=260, h=48, active=False):
 
 
 # ════════════════════════════════════════════
+#  Username Entry
+# ════════════════════════════════════════════
+
+def name_entry_screen(screen, clock, fonts):
+    """Ask player for their name. Returns the entered name string."""
+    font_large, font_medium, font_small = fonts
+    name = ""
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit(); sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN and name.strip():
+                    return name.strip()
+                elif event.key == pygame.K_BACKSPACE:
+                    name = name[:-1]
+                elif event.key == pygame.K_ESCAPE:
+                    return "Player"
+                elif len(name) < 14 and event.unicode.isprintable():
+                    name += event.unicode
+
+        _bg(screen)
+        title = font_large.render("ENTER NAME", True, (100, 180, 255))
+        screen.blit(title, title.get_rect(center=(W//2, H//4)))
+
+        hint = font_small.render("Type your name and press ENTER", True, GRAY)
+        screen.blit(hint, hint.get_rect(center=(W//2, H//4 + 60)))
+
+        box_w, box_h = 300, 52
+        bx, by = W//2 - box_w//2, H//2 - box_h//2
+        pygame.draw.rect(screen, (30, 30, 60), (bx, by, box_w, box_h), border_radius=8)
+        pygame.draw.rect(screen, BLUE, (bx, by, box_w, box_h), 2, border_radius=8)
+
+        display = name + ("|" if pygame.time.get_ticks() % 900 < 450 else "")
+        ns = font_medium.render(display or "|", True, WHITE)
+        screen.blit(ns, ns.get_rect(center=(W//2, H//2)))
+
+        esc_hint = font_small.render("ESC — skip (saves as 'Player')", True, (70, 70, 90))
+        screen.blit(esc_hint, esc_hint.get_rect(center=(W//2, H*3//4)))
+
+        pygame.display.update()
+        clock.tick(30)
+
+
+# ════════════════════════════════════════════
 #  Main Menu
 # ════════════════════════════════════════════
 
@@ -158,7 +204,7 @@ def settings_screen(screen, clock, fonts, settings):
 #  Game Over
 # ════════════════════════════════════════════
 
-def game_over_screen(screen, clock, fonts, score, distance):
+def game_over_screen(screen, clock, fonts, score, distance, coins=0):
     """Returns 'retry' or 'menu'."""
     font_large, font_medium, font_small = fonts
 
@@ -179,9 +225,10 @@ def game_over_screen(screen, clock, fonts, score, distance):
         for i, (text, clr) in enumerate([
             (f"Score    : {score}", GOLD),
             (f"Distance : {distance} m", WHITE),
+            (f"Coins    : {coins}", (255, 215, 0)),
         ]):
             s = font_medium.render(text, True, clr)
-            screen.blit(s, s.get_rect(center=(W//2, H//2 - 20 + i*55)))
+            screen.blit(s, s.get_rect(center=(W//2, H//2 - 40 + i*52)))
 
         for i, line in enumerate([
             "[R / SPACE]  Retry",

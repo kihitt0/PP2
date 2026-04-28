@@ -22,6 +22,7 @@ ROAD_LEFT  = 80
 ROAD_RIGHT = W - 80
 ROAD_W     = ROAD_RIGHT - ROAD_LEFT    # 320
 LANE_W     = ROAD_W // 4               # 4 lanes, each 80px wide
+HUD_H      = 0                         # minimum Y for player (top of road)
 
 LANE_CENTERS = [ROAD_LEFT + LANE_W * i + LANE_W // 2 for i in range(4)]
 
@@ -95,7 +96,7 @@ def _draw_hazard(screen, x, y):
 
 
 def _draw_powerup(screen, pu, font_small):
-    x, y = pu["x"], pu["y"]
+    x, y = pu["x"] + ROAD_LEFT, pu["y"]
     cx   = x + PU_W//2
     cy   = y + PU_H//2
     clr  = pu["ptype"]["color"]
@@ -105,7 +106,7 @@ def _draw_powerup(screen, pu, font_small):
     screen.blit(lbl, lbl.get_rect(center=(cx, cy)))
 
 
-def _draw_hud(screen, score, distance, active_pu, shield_on, coins, font_small):
+def _draw_hud(screen, score, distance, active_pu, shield_on, coins, level, font_small):
     pygame.draw.rect(screen, (15, 15, 35), (0, 0, ROAD_LEFT, H))
     pygame.draw.rect(screen, (15, 15, 35), (ROAD_RIGHT, 0, W-ROAD_RIGHT, H))
 
@@ -123,6 +124,9 @@ def _draw_hud(screen, score, distance, active_pu, shield_on, coins, font_small):
         ("", BLACK),
         ("COINS", (140,140,180)),
         (str(coins), (255,215,0)),
+        ("", BLACK),
+        ("LEVEL", (140,140,180)),
+        (str(level), CYAN),
     ], ROAD_LEFT//2, 40)
 
     status_lines = []
@@ -175,6 +179,10 @@ def run_game(screen, clock, settings, fonts):
     coins    = 0
     dist_acc = 0.0
 
+    level          = 1
+    level_up_until = 0   # timestamp until level-up banner is shown
+    LEVEL_DIST     = 200  # metres per level
+
     enemy_timer  = 0
     hazard_timer = 0
     pu_timer     = 0
@@ -192,7 +200,7 @@ def run_game(screen, clock, settings, fonts):
                 pygame.quit(); sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return score, distance
+                    return score, distance, coins
 
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_LEFT] or keys[pygame.K_a])  and px > 0:
@@ -219,6 +227,13 @@ def run_game(screen, clock, settings, fonts):
 
         # Score from distance + time bonus
         score = distance + coins * 10
+
+        # ── Level progression ─────────────────────
+        new_level = distance // LEVEL_DIST + 1
+        if new_level > level:
+            level          = new_level
+            level_up_until = now + 2000
+            road_speed     = params["enemy_speed"] + level - 1
 
         # ── Spawn enemies ─────────────────────────
         enemy_timer += 1
@@ -253,7 +268,12 @@ def run_game(screen, clock, settings, fonts):
             lane  = random.randint(0, 3)
             pux   = LANE_CENTERS[lane] - ROAD_LEFT - PU_W//2
             ptype = random.choice(POWERUP_TYPES)
-            powerups.append({"x": pux, "y": -PU_H, "ptype": ptype})
+            powerups.append({"x": pux, "y": -PU_H, "ptype": ptype,
+                             "expires": now + 8000})
+
+        # Powerups disappear after timeout even if not collected
+        powerups = [pu for pu in powerups
+                    if pu["y"] < H + PU_H and now < pu["expires"]]
 
         # ── Move objects ──────────────────────────
         for e in enemies:
@@ -265,7 +285,6 @@ def run_game(screen, clock, settings, fonts):
 
         enemies  = [e  for e  in enemies  if e["y"]  < H + ENEMY_H]
         hazards  = [hz for hz in hazards  if hz["y"] < H + HAZARD_H]
-        powerups = [pu for pu in powerups if pu["y"] < H + PU_H]
 
         # ── Collision helpers ─────────────────────
         pr = pygame.Rect(ROAD_LEFT + px, py, PLAYER_W, PLAYER_H)
@@ -281,7 +300,7 @@ def run_game(screen, clock, settings, fonts):
                     active_pu = None
                     enemies.remove(e)
                 else:
-                    return score, distance
+                    return score, distance, coins
 
         # ── Hazard collisions ─────────────────────
         for hz in hazards[:]:
@@ -291,7 +310,7 @@ def run_game(screen, clock, settings, fonts):
                     active_pu = None
                     hazards.remove(hz)
                 else:
-                    return score, distance
+                    return score, distance, coins
 
         # ── Power-up collection ───────────────────
         for pu in powerups[:]:
@@ -330,6 +349,16 @@ def run_game(screen, clock, settings, fonts):
         if shield_on:
             _draw_shield_effect(screen, px, py)
 
-        _draw_hud(screen, score, distance, active_pu, shield_on, coins, font_small)
+        _draw_hud(screen, score, distance, active_pu, shield_on, coins, level, font_small)
+
+        # Level-up banner
+        if now < level_up_until:
+            banner = font_medium.render(f"LEVEL {level}!", True, CYAN)
+            bx = W // 2 - banner.get_width() // 2
+            by = H // 2 - banner.get_height() // 2
+            pygame.draw.rect(screen, (10, 10, 40),
+                             (bx - 12, by - 8, banner.get_width() + 24, banner.get_height() + 16),
+                             border_radius=8)
+            screen.blit(banner, (bx, by))
         pygame.display.update()
         clock.tick(60)

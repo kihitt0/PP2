@@ -26,12 +26,14 @@ def main():
 
     settings = ps.load_settings()
     state    = "menu"
-    last_score, last_dist = 0, 0
+    last_score, last_dist, last_coins = 0, 0, 0
+    player_name = "Player"
 
     while True:
         if state == "menu":
             action = ui.main_menu(screen, clock, ui_fonts)
             if action == "play":
+                player_name = ui.name_entry_screen(screen, clock, ui_fonts)
                 state = "game"
             elif action == "leaderboard":
                 state = "leaderboard"
@@ -42,14 +44,18 @@ def main():
                 sys.exit()
 
         elif state == "game":
-            last_score, last_dist = racer.run_game(screen, clock, settings, game_fonts)
-            ps.add_entry("Player", last_score, last_dist)
+            last_score, last_dist, last_coins = racer.run_game(screen, clock, settings, game_fonts)
+            ps.add_entry(player_name, last_score, last_dist)
             state = "gameover"
 
         elif state == "gameover":
             action = ui.game_over_screen(screen, clock, ui_fonts,
-                                         last_score, last_dist)
-            state = "game" if action == "retry" else "menu"
+                                         last_score, last_dist, last_coins)
+            if action == "retry":
+                state = "game"
+            else:
+                player_name = "Player"
+                state = "menu"
 
         elif state == "leaderboard":
             ui.leaderboard_screen(screen, clock, ui_fonts)
