@@ -47,6 +47,19 @@ def save_session(player_id: int, score: int, level: int):
                 (player_id, score, level)
             )
 
+def get_personal_best(player_id: int) -> int:
+    """Return the player's all-time highest score, or 0 if none."""
+    try:
+        with _conn() as c:
+            with c.cursor() as cur:
+                cur.execute(
+                    "SELECT COALESCE(MAX(score), 0) FROM snake_sessions WHERE player_id=%s",
+                    (player_id,)
+                )
+                return cur.fetchone()[0]
+    except Exception:
+        return 0
+
 def get_top10() -> list:
     try:
         with _conn() as c:

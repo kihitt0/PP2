@@ -187,11 +187,13 @@ def _draw_obstacles(screen, obstacles):
             (c*CELL+1, HUD_H+r*CELL+1, CELL-2, CELL-2), 2, border_radius=2)
 
 
-def _draw_hud(screen, score, level, fps, active_pu, shield, font_small):
+def _draw_hud(screen, score, level, fps, active_pu, shield, personal_best, font_small):
     pygame.draw.rect(screen, (20,20,20), (0, 0, W, HUD_H))
     screen.blit(font_small.render(f"Score: {score}", True, WHITE), (10, 14))
     lvl = font_small.render(f"Lv:{level}  {fps}fps", True, GOLD)
     screen.blit(lvl, (W//2 - lvl.get_width()//2, 14))
+    pb = font_small.render(f"Best: {personal_best}", True, (180, 180, 100))
+    screen.blit(pb, (W - pb.get_width() - 10, 32))
 
     status = ""
     if shield:
@@ -218,7 +220,7 @@ def _flash_level(screen, level, font_large):
 #  Main game loop
 # ════════════════════════════════════════════
 
-def run_game(screen, clock, settings, fonts, sounds=None):
+def run_game(screen, clock, settings, fonts, sounds=None, personal_best=0):
     """Run one game session. Returns (score, level)."""
     font_small, font_medium, font_large, font_tiny = fonts
     snake_color  = tuple(settings.get("snake_color", [0, 200, 0]))
@@ -373,6 +375,6 @@ def run_game(screen, clock, settings, fonts, sounds=None):
         _draw_foods(screen, foods, font_tiny)
         _draw_board_pu(screen, board_pu, font_tiny)
         _draw_snake(screen, snake, snake_color)
-        _draw_hud(screen, score, level, eff_fps(), active_pu, shield, font_small)
+        _draw_hud(screen, score, level, eff_fps(), active_pu, shield, personal_best, font_small)
         pygame.display.update()
         clock.tick(eff_fps())

@@ -306,9 +306,10 @@ def main():
     except Exception as e:
         print(f"[DB] Not available: {e}")
 
-    username  = ""
-    player_id = None
-    state     = "menu"
+    username      = ""
+    player_id     = None
+    personal_best = 0
+    state         = "menu"
     last_score, last_level = 0, 1
 
     while True:
@@ -323,12 +324,17 @@ def main():
                 if db_ok:
                     try:
                         player_id = db.get_or_create_player(username)
+                        personal_best = db.get_personal_best(player_id)
                     except Exception:
                         player_id = None
+                        personal_best = 0
+                else:
+                    personal_best = 0
                 state = "game"
 
         elif state == "game":
-            last_score, last_level = game.run_game(screen, clock, settings, fonts, sounds)
+            last_score, last_level = game.run_game(screen, clock, settings, fonts, sounds,
+                                                   personal_best)
             if db_ok and player_id is not None:
                 try:
                     db.save_session(player_id, last_score, last_level)
